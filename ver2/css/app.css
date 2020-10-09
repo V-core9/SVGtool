@@ -1,0 +1,98 @@
+* {
+    margin: 0;
+    padding: 0;
+    line-height: 1em;
+    font-family: monospace;
+}
+
+body {
+    overflow: hidden;
+    font-family: monospace;
+    color: white;
+    background: #444;
+}
+
+a {
+    color: #03a9f4;
+}
+
+#appContainer {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #555;
+}
+
+#appNavigation {
+    position: relative;
+    top: 0;
+    left: 0;
+    height: 50px;
+    display: flex;
+    background: #444;
+    width: 100%;
+    box-shadow: 0 0 10px black;
+}
+
+#appContent {
+    display: flex;
+    height: calc(100% - 100px);
+    overflow: hidden;
+}
+
+#appFooter {
+    height: 50px;
+    display: flex;
+    background: #444;
+    box-shadow: 0 0 10px black;
+    z-index: 500;
+    position: relative;
+    flex-direction: row;
+    align-items: center;
+    padding: 0 20px;
+    color: white;
+    justify-content: space-between;
+}
+
+
+div#appSvgArea {
+    width: calc(100% - 350px);
+}
+
+div#appSidebar {
+    width: 350px;
+    background: #404040;
+    box-shadow: 0 0 10px;
+    box-shadow: 0 0 10px black;
+}
+
+button {
+    font-size: 16px;
+    background: #333;
+    box-shadow: 0 0 2px gray;
+    border: none;
+    padding: 5px 10px;
+    color: white;
+    margin: 0 5px;
+    cursor: pointer;
+    transition: 0.2s ease all;
+}
+
+button:hover {
+    box-shadow: 0 4px 10px slategray;
+    transition: 0.4s ease all;
+    background: #444;
+}
+
+button:active {
+    transition: 0.1s ease all;
+    box-shadow: 0 px 2px white;
+    background: #111;
+}
+
+button:focus {
+    outline: none;
+}
