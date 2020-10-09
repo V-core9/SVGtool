@@ -1,0 +1,87 @@
+app-svg-container {
+    border: 1vh solid #424242;
+    margin: 2vh;
+    display: block;
+    width: calc(100% - 350px);
+    height: 94vh;
+    background-image: linear-gradient(45deg, #808080 25%, transparent 25%), linear-gradient(-45deg, #808080 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #808080 75%), linear-gradient(-45deg, transparent 75%, #808080 75%);
+    background-size: 60px 60px;
+    background-position: 0 0, 0 30px, 30px -30px, -30px 0px;
+}
+
+svg {
+    box-shadow: 0 0 10px lightsteelblue;
+}
+
+
+
+
+* Global SVG styles */
+svg {
+  height: 90px;
+}
+svg + svg {
+  margin-left: 30px;
+}
+svg path,
+svg line,
+svg polygon,
+svg rect,
+svg circle {
+  -webkit-transition: 0.5s;
+  transition: 0.5s;
+}
+
+.stroke {
+  stroke: white;
+  stroke-width: 0.8;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.fill {
+  fill: white;
+  stroke: none;
+}
+
+
+
+
+
+app-sidebar-container {
+    width: 350px;
+    z-index: 999;
+    top: 0;
+    display: block;
+    position: fixed;
+    right: 0;
+    height: 100%;
+    background: whitesmoke;
+    box-shadow: 0 0 15px BLACK;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 5px 0;
+    align-items: center;
+}
+
+#svg-structure {
+    margin: 5px;
+    background: lavender;
+}
+
+.rootSVG {
+    padding: 5px;
+    background: #cecece;
+}
+    
+.svgElem {
+    margin: 2.5px;
+    background: lightsteelblue;
+    min-height: 20px;
+    padding: 5px 10px;
+}

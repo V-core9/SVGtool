@@ -1,5 +1,5 @@
 var debugEnable = true;
-var appContainer, appSvgArea, appSidebar, appDebugContainer, appDebugLog;
+var appContainer, appSvgArea, appSidebar, appDebugContainer, appDebugLog, currentSVG, currentSVGJSON;
 
 
 // Draw Applicaiton function
@@ -51,7 +51,7 @@ function drawAppSvgArea(){
 
     appSvgArea = document.createElement("APP-SVG-CONTAINER");       
     appContainer.appendChild(appSvgArea);
-    appSvgArea.setAttribute("class", "debug-element");
+    insertStyle('main-app-style','styles/main.css')
 
     if (debugEnable){
         if (document.getElementsByTagName('app-svg-container').length > 0){
@@ -69,9 +69,19 @@ function drawAppSidebar(){
         logDebugMessage('Drawing Application Sidebar');
     }
 
-    appSvgArea = document.createElement("APP-SIDEBAR-CONTAINER");         
-    appContainer.appendChild(appSvgArea);
-    appSvgArea.setAttribute("class", "debug-element");
+    appSidebar = document.createElement("APP-SIDEBAR-CONTAINER");   
+    appSidebar.innerHTML = `<div class="sidebar-header">
+                                <h4>SVG Options</h4>
+                                <button onclick="toggleSidebarVisibility()">Show/Hide</button>
+                            </div>
+                            <div class="sidebar-content">
+                                <div id="svg-structure">
+                                </div>
+                            </div>
+                            <div class="sidebar-footer">
+                            
+                            </div>`;  
+    appContainer.appendChild(appSidebar);
 
     if (debugEnable){
         if (document.getElementsByTagName('app-sidebar-container').length > 0){
@@ -99,6 +109,17 @@ function drawAppDebugConsole(){
 
     appDebugContainer = document.createElement("APP-DEBUG-CONTAINER");      
     document.body.appendChild(appDebugContainer);
+    appDebugContainer.innerHTML =   `<div class='debug-header'>
+                                        <div class="title-part">
+                                            <h3>AppDebugConsole</h3>
+                                        </div>
+                                        <div class="options">
+                                            <button>Options</button>
+                                            <button onclick="toggleDebugVisibility()" class="debugToggleVisibility">Show Debug</button>
+                                        </div>
+                                    </div>
+                                    <div class="debug-content">
+                                    </div>`;
     appDebugContainer.setAttribute("class", "debug-element");
 
     insertStyle('debug-main', 'styles/debug-main.css');
@@ -106,13 +127,23 @@ function drawAppDebugConsole(){
 
     appDebugLog = document.createElement("DIV");   
     appDebugLog.setAttribute("class", "debug-log debug-element");
-    appDebugLog.innerHTML = "<div class='debug-log-top'><h3>Debug Log List</h3><div class='options' onclick='clearDebugLog()'><button>Clear Log</button></div></div>";        
-    appDebugContainer.appendChild(appDebugLog);
+    appDebugLog.innerHTML = `<div class='debug-log-top'>
+                                <h3>Debug Log List</h3>
+                                <div class='options'>
+                                    <button onclick='clearDebugLog()'>Clear Log</button>
+                                    <button onclick='showDebugLogOptions()'>Options</button>
+                                </div>
+                            </div>`;        
+    appDebugContainer.querySelector('.debug-content').appendChild(appDebugLog);
 
     appDebugLogList = document.createElement("DIV");   
     appDebugLogList.setAttribute("class", "debug-log-list debug-element scroller");
     appDebugLogList.innerHTML = "<div class='anchor'></div>";   
     appDebugLog.appendChild(appDebugLogList);
+
+    currentSVGJSON = document.createElement("DIV");   
+    currentSVGJSON.setAttribute("id", "currentSVGJSON");
+    appDebugContainer.querySelector('.debug-content').appendChild(currentSVGJSON);
 
     if (debugEnable){
         if (document.getElementsByTagName('app-debug-container').length > 0){
@@ -162,6 +193,12 @@ function timeStamp(){
 }
 //!!
 
+//
+function toggleDebugVisibility(){
+    appDebugContainer.classList.toggle('shown');
+};
+//!!
+
 // Trows modal to choose new SVG or load old one
 function newSvgStartPoint(){
     var element =  document.getElementById('custom-modals-style');
@@ -196,7 +233,27 @@ function newSvgStartConfig(){
 
     var newModal = document.createElement("DIV");   
     newModal.setAttribute("class", "modal startingConfigSVGModal");
-    newModal.innerHTML = "<h3>Choose SVG dimensions?</h3><br>Width: <input type='number' id='newSvgWidth' value='100'><br>Height: <input type='number' id='newSvgHeight' value='100'><br><button onclick='startNewSvgFromConfig()'>Create</button><button onclick='cancelSVGConfigModal()'>Cancel</button>";        
+    newModal.innerHTML =    `<div class='title-part'>
+                                <h3>Choose SVG dimensions?</h3>
+                            </div>
+                            <div class='content-part'>
+                                <div class='singleOption'>
+                                    <p>Name:</p>
+                                    <input type='text' id='newSvgName' placeholeder='Enter name' required>
+                                </div>
+                                <div class='singleOption'>
+                                    <p>Width:</p>
+                                    <input type='number' id='newSvgWidth' value='100'>
+                                </div>
+                                <div class='singleOption'>
+                                    <p>Height:</p>
+                                    <input type='number' id='newSvgHeight' value='100'>
+                                </div>
+                                <div class='modal-options'>
+                                    <button onclick='startNewSvgFromConfig()'>Create</button>
+                                    <button onclick='cancelSVGConfigModal()'>Cancel</button>
+                                </div>
+                            </div>`;        
     appContainer.appendChild(newModal);
 
     if (debugEnable){
@@ -219,17 +276,38 @@ function cancelSVGConfigModal(){
 
 //Start new svg from modal config
 function startNewSvgFromConfig(){
+
     if (debugEnable){
         logDebugMessage('Width: '+document.getElementById('newSvgWidth').value+'; Height: '+document.getElementById('newSvgHeight').value)
     }
+     
+    appSvgArea.innerHTML += `<svg id="`+document.getElementById('newSvgName').value+`" viewBox="0 0 16.6 16.6"  width="`+document.getElementById('newSvgWidth').value+`" height="`+document.getElementById('newSvgHeight').value+`">
+                            </svg>`;
     
-    var newSVG = document.createElement("SVG");   
-    newSVG.innerHTML = "<h3>Choose SVG dimensions?</h3><br>Width: <input type='number' id='newSvgWidth' value='100'><br>Height: <input type='number' id='newSvgHeight' value='100'><br><button onclick='startNewSvgFromConfig()'>Create</button><button onclick='cancelSVGConfigModal()'>Cancel</button>";        
-    appSvgArea.appendChild(newSVG);
+    currentSVGJSON = {  name:   document.getElementById('newSvgName').value,
+                        height: document.getElementById('newSvgHeight').value,
+                        width: document.getElementById('newSvgWidth').value,
+                        top: 0,
+                        left: 0,
+                        paths:  [],
+                    };
+    
+    currentSVG = document.getElementById(document.getElementById('newSvgName').value);   
+
+    document.getElementById('svg-structure').innerHTML = '<div id="svg-'+document.getElementById('newSvgName').value+'" class="rootSVG"><div class="header"><h4>SVG: <input type="text" value="'+document.getElementById('newSvgName').value+'"></h4><button>Save</button></div></div>';
+
+    document.getElementById(document.getElementById('newSvgName').value).innerHTML =  '<circle class="stroke" cx="8.2" cy="8.2" r="7.8" />';
+    document.getElementById('svg-'+document.getElementById('newSvgName').value).innerHTML += '<div class="svg-child-'+document.getElementById('newSvgName').value+' svgElem"></div>';
+    
+    currentSVGJSON.paths.push({ "pathName" : 'svg-'+document.getElementById('newSvgName').value, "pathType" : "circle" });
+
+    document.getElementById('currentSVGJSON').innerHTML = JSON.stringify(currentSVGJSON);
 
     if (debugEnable){
         logDebugMessage('Created SVG from Config')
     }
+
+    removeDomElement('.startingConfigSVGModal');
 }
 //!!
 
