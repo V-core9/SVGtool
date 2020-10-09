@@ -43,3 +43,15 @@ div#debugContainer.shown button.debugToggler{
     right: unser;
     border-radius: 0    ;
 }
+
+
+div#debugContentEvents {
+    width: 350px;
+    display: flex;
+    height: 100%;
+}
+
+div#debugContentJSON {
+    height: 100%;
+    padding: 5px;
+}
