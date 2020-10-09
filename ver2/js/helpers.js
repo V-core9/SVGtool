@@ -35,3 +35,14 @@ function closeFullscreen() {
     document.msExitFullscreen();
   }
 }
+
+
+
+function toggleMenu(elem){
+    elem.parentNode.classList.toggle('open');
+}
+
+
+function closeModal(){
+    document.getElementById('appModal').remove();
+}
