@@ -186,7 +186,7 @@ function createNewFileNow(){
         }
         
         if (fileStatus !== true){
-            filesJSON.svgItems.push( {"name" : document.getElementById('newFileName').value , "width" : 100, "height" : 100,});
+            filesJSON.svgItems.push( {"name" : document.getElementById('newFileName').value , "width" : 100, "height" : 100, "paths" : []});
             changeSelected(document.getElementById('newFileName').value);
             closeModal();
         } else {
@@ -201,7 +201,11 @@ function createNewFileNow(){
 function updateSidebarContentTabs(){
     var i, x = "";
     for (i in filesJSON.svgItems) {
-        x += "<button class='singleTabName' onclick='changeSelected(this.innerHTML)'>" + filesJSON.svgItems[i].name + "</button>";
+        var helperVal = "";
+        if (filesJSON.svgItems[i].selected == true){
+            helperVal = 'active';
+        };
+        x += "<button class='singleTabName "+helperVal+"' onclick='changeSelected(this.innerHTML)'>" + filesJSON.svgItems[i].name + "</button>";
     }
     document.querySelector("#appSidebar .tabs").innerHTML = x;
 }
@@ -216,20 +220,24 @@ function changeSelected(name){
         }
     }
 
-    updateSidebarConContent(name);
+    updateSidebarConContent();
+    
+    drawSelectedSvg();
 
-    document.getElementById('debugContent').innerHTML = JSON.stringify(filesJSON);
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
 }
 
-function updateSidebarConContent(name){
+function updateSidebarConContent(){
     var i, x = "";
     for (i in filesJSON.svgItems) {
-        if (filesJSON.svgItems[i].name == name){
-            x += "<div class='svgSideElem";
-            if (filesJSON.svgItems[i].selected == true){
-                x += " active";
+        if (filesJSON.svgItems[i].selected == true){
+            x += "<div class='svgSideElem'><p>" + filesJSON.svgItems[i].name + "</p><div class='options'><button onclick='addSvgElementModal()'>Add</button><button onclick='showSvgOptionsModal()' data-id='" + filesJSON.svgItems[i].name + "'>O</button></div></div>";
+            if (filesJSON.svgItems[i].paths.length > 0){
+                var z = "";
+                for (z in filesJSON.svgItems[i].paths){
+                    x += "<div class='svgSideElem pathElem'><p>" + filesJSON.svgItems[i].paths[z].name + "</p><div class='options'><button onclick='openPathOptions("+ z +")'>O</button><button onclick='deletePath()'>X</button></div></div>";
+                }
             }
-            x += "'><p>" + filesJSON.svgItems[i].name + "</p><button onclick='showSvgOptionsModal()' data-id='" + filesJSON.svgItems[i].name + "'>O</button></div>";
         }
     }
     document.querySelector("#appSidebar .content").innerHTML = x;
@@ -286,5 +294,161 @@ function saveSvgOptionsModalData (x){
 
         updateSidebarContentTabs();
         updateSidebarConContent(filesJSON.svgItems[x].name);
+        drawSelectedSvg();
     }
+}
+
+function drawSelectedSvg(){
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+    if (filesJSON.svgItems[x].paths != []){
+        var z = ""
+        for (z in filesJSON.svgItems[x].paths){
+            svgStringHelper += `<`+filesJSON.svgItems[x].paths[z].type+` x="50" y="20" rx="20" ry="20" width="150" height="150" style="fill:`+filesJSON.svgItems[x].paths[z].newSvgFillCol+`;stroke:`+filesJSON.svgItems[x].paths[z].newSvgStrokeCol+`;stroke-width:`+filesJSON.svgItems[x].paths[z].newSvgStrokeWidthCol+`;opacity:0.5" />`;
+
+        }
+    }
+    
+    document.getElementById('appSvgArea').innerHTML =   `<svg width="`+filesJSON.svgItems[x].width+`" height="`+filesJSON.svgItems[x].height+`">
+                                                            `+svgStringHelper+`
+                                                        </svg>`;
+}
+
+
+function addSvgElementModal(){
+    drawApplicationInnerElem('appModal', 'appContainer');
+
+    document.getElementById('appModal').innerHTML =    `<div class='inner'>
+                                                            <div class="title">
+                                                                <p>New Svg elem</p>
+                                                                <button onclick="closeModal()" class="fukNoColor">X</button>
+                                                            </div>
+                                                            <div class="content">
+                                                                <div class="singleOption">
+                                                                    <p>Name</p>
+                                                                    <input type="text" id="newSvgElemName" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Type</p>
+                                                                    <select id='newSvgElemType'>
+                                                                        <option value='circle'>Circle</option>
+                                                                        <option value='rect'>Rectangle</option>
+                                                                        <option value='polygon'>Polygon</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Fill</p>
+                                                                    <input type="color" id="newSvgFillCol" value="#444444">
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Stroke</p>
+                                                                    <input type="color" id="newSvgStrokeCol" value="#ff2222">
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Stroke width</p>
+                                                                    <input type="range" min="0.1" max="5" value="1.5" step="0.1" id="newSvgStrokeWidthCol">
+                                                                </div>
+                                                            </div>
+                                                            <div class="options">
+                                                                <button onclick="addNewSvgElem()" class="goodColor">Start</button>
+                                                                <button onclick="closeModal()" class="badColor">Cancel</button>
+                                                            </div>
+                                                        </div>`;
+}
+
+
+function addNewSvgElem(){
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+
+
+    filesJSON.svgItems[x].paths.push({'name': document.getElementById('newSvgElemName').value,'type': document.getElementById('newSvgElemType').value,'newSvgFillCol': document.getElementById('newSvgFillCol').value,'newSvgStrokeCol': document.getElementById('newSvgStrokeCol').value,'newSvgStrokeWidthCol': document.getElementById('newSvgStrokeWidthCol').value,});
+
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
+
+    closeModal();
+    updateSidebarConContent();
+    
+    drawSelectedSvg();
+}
+
+
+function openPathOptions(v){
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+
+    drawApplicationInnerElem('appModal', 'appContainer');
+
+    document.getElementById('appModal').innerHTML =    `<div class='inner'>
+                                                            <div class="title">
+                                                                <p>Svg elem options</p>
+                                                                <button onclick="closeModal()" class="fukNoColor">X</button>
+                                                            </div>
+                                                            <div class="content">
+                                                                <div class="singleOption">
+                                                                    <p>Name</p>
+                                                                    <input type="text" id="newSvgElemName" value="`+filesJSON.svgItems[x].paths[v].name+`">
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Type</p>
+                                                                    <select id='newSvgElemType'>
+                                                                        <option value='circle'>Circle</option>
+                                                                        <option value='rect'>Rectangle</option>
+                                                                        <option value='polygon'>Polygon</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>X</p>
+                                                                    <input id="newSvgX" input type="range" min="1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Y</p>
+                                                                    <input  id="newSvgY" input type="range" min="0.1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>RX</p>
+                                                                    <input  id="newSvgRX" input type="range" min="0.1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>RY</p>
+                                                                    <input id="newSvgRY" input type="range" min="0.1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Widht</p>
+                                                                    <input id="newSvgWidht" input type="range" min="0.1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Height</p>
+                                                                    <input id="newSvgHeight" input type="range" min="0.1" max="5" value="1.5" step="0.1" >
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Fill</p>
+                                                                    <input type="color" id="newSvgFillCol" value="#444444">
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Stroke</p>
+                                                                    <input type="color" id="newSvgStrokeCol" value="#ff2222">
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Stroke width</p>
+                                                                    <input type="range" min="0.1" max="5" value="1.5" step="0.1" id="newSvgStrokeWidthCol">
+                                                                </div>
+                                                            </div>
+                                                            <div class="options">
+                                                                <button onclick="addNewSvgElem()" class="goodColor">Start</button>
+                                                                <button onclick="closeModal()" class="badColor">Cancel</button>
+                                                            </div>
+                                                        </div>`;
 }

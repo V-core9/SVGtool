@@ -288,5 +288,40 @@ div#appSidebar .header {
 #appSidebar .content .svgSideElem {
     display: flex;
     justify-content: space-between;
+    transition: 0.25s ease all;
     align-items: center;
 }
+
+.svgSideElem.pathElem {
+    margin: 5px 10px;
+    background: linear-gradient(90deg, transparent, #3c515a, transparent);
+    background-size: 200%;
+    background-position: left;
+    border: 1px solid #3f4547;
+    padding: 5px 10px;
+}
+
+.svgSideElem:hover {
+    background-position: right;
+    transition: 0.5s ease all;
+}
+
+
+input[type='range']{
+    padding: 0;
+  }
+  
+  input[type='range']::-webkit-slider-runnable-track {
+    height: 10px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #444444;
+    border-radius: 20px;
+  }
+  
+  input[type='range']::-webkit-slider-thumb {
+    box-shadow: 0px 0px 2px #000000, 0px 0px 2px #0d0d0d;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-top: -3.6px;
+  }

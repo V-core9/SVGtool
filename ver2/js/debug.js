@@ -24,6 +24,8 @@ function drawDebugHeader(){
 
 function drawDebugContentContainer(){
     drawApplicationInnerElem('debugContent', 'debugContainer');
+    drawApplicationInnerElem('debugContentEvents', 'debugContent');
+    drawApplicationInnerElem('debugContentJSON', 'debugContent');
 }
 
 function toggleDebugOpen(){
