@@ -186,7 +186,7 @@ function createNewFileNow(){
         }
         
         if (fileStatus !== true){
-            filesJSON.svgItems.push( {"name" : document.getElementById('newFileName').value , "width" : 100, "height" : 100, "paths" : []});
+            filesJSON.svgItems.push( {"name" : document.getElementById('newFileName').value , "width" : 400, "height" : 400, "paths" : []});
             changeSelected(document.getElementById('newFileName').value);
             closeModal();
         } else {
