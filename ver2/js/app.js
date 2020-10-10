@@ -106,11 +106,14 @@ function drawAppFooter(){
 // Helper that actually draws elements
 // newId => type(string)....id of new div
 // parentId => type(string)...id of parent elem
-function drawApplicationInnerElem(newId, parentId){
-    var appSidebar = document.createElement("DIV");        
-    appSidebar.setAttribute('id', newId);
+function drawApplicationInnerElem(newId, parentId, classNew = null){
+    var appElem = document.createElement("DIV");        
+    appElem.setAttribute('id', newId);  
+    if (classNew != null){
+        appElem.setAttribute('class', classNew);
+    }
 
-    document.getElementById(parentId).appendChild(appSidebar);
+    document.getElementById(parentId).appendChild(appElem);
 
 }
 //!! 
@@ -173,27 +176,29 @@ function createNewFile(){
 
 function createNewFileNow(){
     
-    if (document.getElementById('newFileName').value == ""){
+    var newFileName = document.getElementById('newFileName').value;
+
+    if (newFileName == ""){
+        newFileName = generateRandomNameFile();
+    } 
+
+    var i, fileStatus = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].name == newFileName){
+            fileStatus = true;
+        } else {
+            fileStatus = false;
+        }
+    }
+    
+    if (fileStatus !== true){
+        filesJSON.svgItems.push( {"name" : newFileName , "top" : 40, "left" : 40, "width" : 400, "height" : 400, "paths" : []});
+        changeSelected(newFileName);
         closeModal();
     } else {
-        var i, fileStatus = "";
-        for (i in filesJSON.svgItems) {
-            if (filesJSON.svgItems[i].name == document.getElementById('newFileName').value){
-                fileStatus = true;
-            } else {
-                fileStatus = false;
-            }
-        }
-        
-        if (fileStatus !== true){
-            filesJSON.svgItems.push( {"name" : document.getElementById('newFileName').value , "width" : 400, "height" : 400, "paths" : []});
-            changeSelected(document.getElementById('newFileName').value);
-            closeModal();
-        } else {
-            alert('File Already Exists');
-        }
-        
+        alert('File Already Exists');
     }
+
     updateSidebarContentTabs();
 }
 
@@ -231,7 +236,7 @@ function updateSidebarConContent(){
     var i, x = "";
     for (i in filesJSON.svgItems) {
         if (filesJSON.svgItems[i].selected == true){
-            x += "<div class='svgSideElem'><p>" + filesJSON.svgItems[i].name + "</p><div class='options'><button onclick='addSvgElementModal()'>Add</button><button onclick='showSvgOptionsModal()' data-id='" + filesJSON.svgItems[i].name + "'>O</button></div></div>";
+            x += "<div class='svgSideElem'><p>" + filesJSON.svgItems[i].name + "</p><div class='options'><button onclick='addSvgElementModal()'>Add</button><button onclick='showSvgOptionsModal()' data-id='" + filesJSON.svgItems[i].name + "'>M</button><button onclick='showSvgOptionsSidebar()' data-id='" + filesJSON.svgItems[i].name + "'>S</button></div></div>";
             if (filesJSON.svgItems[i].paths.length > 0){
                 var z = "";
                 for (z in filesJSON.svgItems[i].paths){
@@ -280,6 +285,103 @@ function showSvgOptionsModal(){
                                                         </div>`;
 }
 
+function showSvgOptionsSidebar(){
+    
+    drawApplicationInnerElem('appModal', 'appContainer' , 'modalSidebar');
+
+    var i, x = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+
+    document.getElementById('appModal').innerHTML =    `<div class='inner'>
+                                                            <div class="title">
+                                                                <p>Svg Options</p>
+                                                                <button onclick="closeModal()" class="fukNoColor">>></button>
+                                                            </div>
+                                                            <div class="content">
+                                                                <div class="singleOption">
+                                                                    <p>Name</p>
+                                                                    <input type='text' id='currentFileName' value='`+filesJSON.svgItems[x].name+`'   onchange='updateSvgOptionsSidebarData()'>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Top</p>
+                                                                    <div class='options'>
+                                                                        <input type='number' id='currentFileTop' min='1' max='800' step='1' value='`+filesJSON.svgItems[x].top+`'   onchange='updateSvgOptionsSidebarData()'>
+                                                                        <input type='range' id='currentFileTopSlider' min='1' max='800' step='1'  value='`+filesJSON.svgItems[x].top+`'   oninput='document.getElementById("currentFileTop").value = this.value; updateSvgOptionsSidebarData(); '>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Left</p>
+                                                                    <div class='options'>
+                                                                        <input type='number' id='currentFileLeft' min='1' max='800' step='1' value='`+filesJSON.svgItems[x].left+`'   onchange='updateSvgOptionsSidebarData()'>
+                                                                        <input type='range' id='currentFileLeftSlider' min='1' max='800' step='1'  value='`+filesJSON.svgItems[x].left+`'   oninput='document.getElementById("currentFileLeft").value = this.value; updateSvgOptionsSidebarData(); '>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Height</p>
+                                                                    <div class='options'>
+                                                                        <input type='number' id='currentFileHeight' min='1' max='800' step='1' value='`+filesJSON.svgItems[x].height+`'   onchange='updateSvgOptionsSidebarData()'>
+                                                                        <input type='range' id='currentFileHeightSlider' min='1' max='800' step='1'  value='`+filesJSON.svgItems[x].height+`'   oninput='document.getElementById("currentFileHeight").value = this.value; updateSvgOptionsSidebarData(); '>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>Width</p>
+                                                                    <div class='options'>
+                                                                        <input type='number' id='currentFileWidth' value='`+filesJSON.svgItems[x].width+`'   onchange='updateSvgOptionsSidebarData()'>
+                                                                        <input type='range' id='currentFileWidthSlider' min='1' max='800' step='1'  value='`+filesJSON.svgItems[x].width+`'   oninput='document.getElementById("currentFileWidth").value = this.value; updateSvgOptionsSidebarData(); '>
+                                                                    </div>
+                                                                </div>
+                                                                <div class="singleOption">
+                                                                    <p>BackgroundColor</p>
+                                                                    <div class='options'>
+                                                                        <button id='currentFileBackColorClear' onclick='document.getElementById("currentFileBackColor").value = "rgba(0,0,0,0)"'>Clear</button>
+                                                                        <input type='color' id='currentFileBackColor' value='`+filesJSON.svgItems[x].backColor+`'  onchange='updateSvgOptionsSidebarData()'  oninput='updateSvgOptionsSidebarData()' colorformat="rrggbbaa">
+                                                                    </div>
+                                                                    
+                                                                </div>
+                                                            </div>
+                                                            <div class="options">
+                                                                <button onclick="closeModal()" class="badColor">Close</button>
+                                                            </div>
+                                                        </div>`;
+
+    setTimeout(function(){
+        document.getElementById('appModal').style.right = '0';
+    }, 25); 
+}
+
+function updateSvgOptionsSidebarData(){
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+
+    if ((document.getElementById('currentFileName').value == "") || (document.getElementById('currentFileHeight').value == "") || (document.getElementById('currentFileWidth').value == "") ){
+        closeModal();
+    } else { 
+        
+        filesJSON.svgItems[x].name = document.getElementById('currentFileName').value;
+        filesJSON.svgItems[x].top = document.getElementById('currentFileTop').value;
+        filesJSON.svgItems[x].left = document.getElementById('currentFileLeft').value;
+        filesJSON.svgItems[x].height = document.getElementById('currentFileHeight').value;
+        filesJSON.svgItems[x].width = document.getElementById('currentFileWidth').value;
+        filesJSON.svgItems[x].backColor = document.getElementById('currentFileBackColor').value;
+        
+        //closeModal();
+
+        updateSidebarContentTabs();
+        updateSidebarConContent(filesJSON.svgItems[x].name);
+        drawSelectedSvg();
+        
+        document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
+    }
+}
+
 
 function saveSvgOptionsModalData (x){
     if ((document.getElementById('currentFileName').value == "") || (document.getElementById('currentFileHeight').value == "") || (document.getElementById('currentFileWidth').value == "") ){
@@ -289,6 +391,7 @@ function saveSvgOptionsModalData (x){
         filesJSON.svgItems[x].name = document.getElementById('currentFileName').value;
         filesJSON.svgItems[x].height = document.getElementById('currentFileHeight').value;
         filesJSON.svgItems[x].width = document.getElementById('currentFileWidth').value;
+        filesJSON.svgItems[x].backColor = document.getElementById('currentFileBackColor').value;
         
         closeModal();
 
@@ -296,6 +399,9 @@ function saveSvgOptionsModalData (x){
         updateSidebarConContent(filesJSON.svgItems[x].name);
         drawSelectedSvg();
     }
+
+    
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
 }
 
 function drawSelectedSvg(){
@@ -313,9 +419,24 @@ function drawSelectedSvg(){
         }
     }
     
-    document.getElementById('appSvgArea').innerHTML =   `<svg width="`+filesJSON.svgItems[x].width+`" height="`+filesJSON.svgItems[x].height+`">
+    document.getElementById('appSvgArea').innerHTML =   `<svg id="file-`+filesJSON.svgItems[x].name+`" width="`+filesJSON.svgItems[x].width+`" height="`+filesJSON.svgItems[x].height+`">
                                                             `+svgStringHelper+`
                                                         </svg>`;
+    
+    if (filesJSON.svgItems[x].fixed != ""){
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.position = 'relative';
+    } else {
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.position = 'absolute';
+    }
+    if (filesJSON.svgItems[x].top != ""){
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.top = filesJSON.svgItems[x].top+'px';
+    }
+    if (filesJSON.svgItems[x].left != ""){
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.left = filesJSON.svgItems[x].left+'px';
+    }
+    if (filesJSON.svgItems[x].backColor != ""){
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.backgroundColor = filesJSON.svgItems[x].backColor;
+    }
 }
 
 
@@ -334,34 +455,37 @@ function addSvgElementModal(){
                                                                 </div>
                                                                 <div class="singleOption">
                                                                     <p>Type</p>
-                                                                    <select id='newSvgElemType'>
-                                                                        <option value='circle'>Circle</option>
-                                                                        <option value='rect'>Rectangle</option>
-                                                                        <option value='polygon'>Polygon</option>
-                                                                    </select>
-                                                                </div>
-                                                                <div class="singleOption">
-                                                                    <p>Fill</p>
-                                                                    <input type="color" id="newSvgFillCol" value="#444444">
-                                                                </div>
-                                                                <div class="singleOption">
-                                                                    <p>Stroke</p>
-                                                                    <input type="color" id="newSvgStrokeCol" value="#ff2222">
-                                                                </div>
-                                                                <div class="singleOption">
-                                                                    <p>Stroke width</p>
-                                                                    <input type="range" min="0.1" max="5" value="1.5" step="0.1" id="newSvgStrokeWidthCol">
+                                                                    <div >
+                                                                        <button onclick='addCircleElem()'>Circle</button>
+                                                                        <button onclick='addRectElem()'>Rectangle</button>
+                                                                        <button onclick='addPolygonElem()'>Polygon</button>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                             <div class="options">
-                                                                <button onclick="addNewSvgElem()" class="goodColor">Start</button>
                                                                 <button onclick="closeModal()" class="badColor">Cancel</button>
                                                             </div>
                                                         </div>`;
 }
 
+function addCircleElem(){
+    addNewSvgElem(document.getElementById('newSvgElemName').value, 'circle')
+}
 
-function addNewSvgElem(){
+function addRectElem(){
+    addNewSvgElem(document.getElementById('newSvgElemName').value, 'rect')
+}
+
+function addPolygonElem(){
+    addNewSvgElem(document.getElementById('newSvgElemName').value, 'polygon')
+}
+
+
+function addNewSvgElem(name, type){
+    if (name == ""){
+        name = generateRandomNameElem();
+    }
+
     var i, x, svgStringHelper = "";
     for (i in filesJSON.svgItems) {
         if (filesJSON.svgItems[i].selected == true){
@@ -370,7 +494,7 @@ function addNewSvgElem(){
     }
 
 
-    filesJSON.svgItems[x].paths.push({'name': document.getElementById('newSvgElemName').value,'type': document.getElementById('newSvgElemType').value,'newSvgFillCol': document.getElementById('newSvgFillCol').value,'newSvgStrokeCol': document.getElementById('newSvgStrokeCol').value,'newSvgStrokeWidthCol': document.getElementById('newSvgStrokeWidthCol').value,});
+    filesJSON.svgItems[x].paths.push({'name': name,'type': type,});
 
     document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
 
@@ -451,4 +575,16 @@ function openPathOptions(v){
                                                                 <button onclick="closeModal()" class="badColor">Cancel</button>
                                                             </div>
                                                         </div>`;
+}
+
+function generateRandomNameElem(){
+    return ('elem-'+ generateRandomNumber());
+}
+
+function generateRandomNameFile(){
+    return ('file-'+ generateRandomNumber());
+}
+
+function generateRandomNumber(){
+    return Math.floor((Math.random() * 1000000000) + 1);
 }

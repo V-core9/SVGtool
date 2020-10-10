@@ -46,3 +46,4 @@ function toggleMenu(elem){
 function closeModal(){
     document.getElementById('appModal').remove();
 }
+
