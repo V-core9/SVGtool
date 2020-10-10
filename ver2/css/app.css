@@ -209,6 +209,8 @@ div#appModal .inner .content .singleOption {
     flex-direction: row;
     justify-content: space-between;
     padding: 1em;
+    /* background: orange; */
+    border-top: 1px solid gray;
 }
 
 div#appModal .inner .options {
@@ -325,3 +327,41 @@ input[type='range']{
     border-radius: 20px;
     margin-top: -3.6px;
   }
+
+
+
+
+
+  div#appModal.modalSidebar {
+    position: absolute;
+    top: 50px;
+    padding: 0;
+    right: -350px;
+    width: 350px;
+    background: #08253ced;
+    left: unset;
+    height: calc(100% - 100px);
+    box-shadow: none;
+    transition: 0.25s ease all;
+}
+
+div#appModal.modalSidebar .inner {
+    box-shadow: none;
+    background: transparent;
+    top: 0;
+    padding: 10px 20px;
+    display: flex;
+    flex-direction: column;
+    width: calc(100% - 40px);
+}
+
+
+div#appModal .inner .content .singleOption .options {
+    display: flex;
+    flex-direction: column;
+    max-width: 50%;
+}
+
+div#appModal .inner .content .singleOption .options input {
+    margin: 5px 0;
+}
