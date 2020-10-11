@@ -365,3 +365,56 @@ div#appModal .inner .content .singleOption .options {
 div#appModal .inner .content .singleOption .options input {
     margin: 5px 0;
 }
+
+
+
+div#appModal .inner .content .singleOption.extensiveOption {
+    flex-direction: column;
+    border: 1px solid #03A9F4;
+    padding: 0;
+}
+
+div#appModal .inner .content .singleOption.extensiveOption h4 {
+    margin: 0 0 10px 0;
+    font-size: 20px;
+    color: #03A9F4;
+    padding: 5px 10px;
+    background: rgb(0 0 0 / .5);
+    margin-bottom: 0;
+}
+
+
+
+
+.footerOptions {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+.singleFooterOption {
+    display: flex;
+    margin: 0 10px;
+    
+}
+
+
+#appFooter input[type='range']{
+    padding: 0;
+    margin: 0 10px;
+  }
+  
+#appFooter input[type='range']::-webkit-slider-runnable-track {
+    height: 10px;
+    cursor: pointer;
+    box-shadow: 0px 0px 0px #000000, 0px 0px 0px #0d0d0d;
+    background: #666666;
+    border-radius: 20px;
+  }
+  
+#appFooter input[type='range']::-webkit-slider-thumb {
+    box-shadow: 0px 0px 2px #000000, 0px 0px 2px #0d0d0d;
+    cursor: pointer;
+    border-radius: 20px;
+    margin-top: -2.6px;
+  }
