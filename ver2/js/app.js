@@ -94,12 +94,17 @@ function drawAppSidebar(){
 
 function drawAppFooter(){
     drawApplicationInnerElem('appFooter', 'appContainer');
-    document.getElementById('appFooter').innerHTML = `<div class="devCredits">
-                                                <p>Created by <a href="#">MikiTheGreat</a></p>
-                                            </div>
-                                            <div class="footerOptions">
-                                                <button onclick="toggleFullScreen()">Full Screen</button>
-                                            </div>`;
+    document.getElementById('appFooter').innerHTML =    `<div class="footerOptions">
+                                                            <button onclick="toggleFullScreen()">Full Screen</button>
+                                                            <div class="singleFooterOption">
+                                                                <p>Zoom</p>
+                                                                <input type='nubmer' id='zoomLevel' min='0.01' max='5' step='0.01' value='1' oninput='changeZoomLevel()'  onchange='changeZoomLevel()'>
+                                                                <input type='range' min='0.01' max='5' step='0.01' value='1' id='zoomLevelRange'  oninput='document.getElementById("zoomLevel").value = this.value; changeZoomLevel()'  oninput='changeZoomLevel()'>
+                                                            </div>
+                                                        </div>
+                                                        <div class="devCredits">
+                                                            <p>Created by <a href="#">MikiTheGreat</a></p>
+                                                        </div>`;
 }
 
 
@@ -107,6 +112,11 @@ function drawAppFooter(){
 // newId => type(string)....id of new div
 // parentId => type(string)...id of parent elem
 function drawApplicationInnerElem(newId, parentId, classNew = null){
+
+    if (document.getElementById(newId) != null){
+        document.getElementById(newId).remove();
+    };
+
     var appElem = document.createElement("DIV");        
     appElem.setAttribute('id', newId);  
     if (classNew != null){
@@ -192,7 +202,7 @@ function createNewFileNow(){
     }
     
     if (fileStatus !== true){
-        filesJSON.svgItems.push( {"name" : newFileName , "top" : 40, "left" : 40, "width" : 400, "height" : 400, "paths" : []});
+        filesJSON.svgItems.push( {"name" : newFileName , "top" : 40, "left" : 40, "width" : 400, "height" : 400, 'backColorAlpha' : '0', 'backColor' : '#000000', "paths" : []});
         changeSelected(newFileName);
         closeModal();
     } else {
@@ -240,7 +250,7 @@ function updateSidebarConContent(){
             if (filesJSON.svgItems[i].paths.length > 0){
                 var z = "";
                 for (z in filesJSON.svgItems[i].paths){
-                    x += "<div class='svgSideElem pathElem'><p>" + filesJSON.svgItems[i].paths[z].name + "</p><div class='options'><button onclick='openPathOptionsModal("+ z +")'>M</button><button onclick='openPathOptionsSidebar("+ z +")' data-id='" + filesJSON.svgItems[i].name + "'>S</button></div><button onclick='deletePath()'>X</button></div></div>";
+                    x += "<div class='svgSideElem pathElem' data-name='"+ filesJSON.svgItems[i].paths[z].name +"' onmouseenter='startSingleElemSidebarHover(this)' onmouseleave='endSingleElemSidebarHover(this)'><div class='elem-data'><p class='pathName'>" + filesJSON.svgItems[i].paths[z].name + "</p><p class='pathType'>" + filesJSON.svgItems[i].paths[z].type + "</p></div><div class='options'><button onclick='openPathOptionsModal("+ z +")'>M</button><button onclick='openPathOptionsSidebar("+ z +")'>S</button><button onclick='movePathLayerBottom("+ z +")' title='Move Path Layer Towards Front'>F</button><button onclick='movePathLayerTop("+ z +")' title='Move Path Layer Towards Background'>B</button></div><button onclick='deletePath("+ z +")'>X</button></div></div>";
                 }
             }
         }
@@ -284,6 +294,7 @@ function updateSvgOptionsSidebarData(){
         filesJSON.svgItems[x].height = document.getElementById('currentFileHeight').value;
         filesJSON.svgItems[x].width = document.getElementById('currentFileWidth').value;
         filesJSON.svgItems[x].backColor = document.getElementById('currentFileBackColor').value;
+        filesJSON.svgItems[x].backColorAlpha = document.getElementById('currentFileBackColorAlpha').value;
         
         //closeModal();
 
@@ -333,7 +344,7 @@ function fileOptionsForm(){
                 <div class="content">
                     <div class="singleOption">
                         <p>Name</p>
-                        <input type='text' id='currentFileName' value='`+filesJSON.svgItems[x].name+`'   onchange='updateSvgOptionsSidebarData()'>
+                        <input type='text' id='currentFileName' value='`+filesJSON.svgItems[x].name+`'   onchange='updateSvgOptionsSidebarData()'  oninput='updateSvgOptionsSidebarData()'>
                     </div>
                     <div class="singleOption">
                         <p>Top</p>
@@ -366,11 +377,12 @@ function fileOptionsForm(){
                     <div class="singleOption">
                         <p>BackgroundColor</p>
                         <div class='options'>
-                            <button id='currentFileBackColorClear' onclick='document.getElementById("currentFileBackColor").value = "rgba(0,0,0,0)"'>Clear</button>
                             <input type='color' id='currentFileBackColor' value='`+filesJSON.svgItems[x].backColor+`'  onchange='updateSvgOptionsSidebarData()'  oninput='updateSvgOptionsSidebarData()' colorformat="rrggbbaa">
+                            <input type='number' id='currentFileBackColorAlpha' value='`+filesJSON.svgItems[x].backColorAlpha+`'   onchange='updateSvgOptionsSidebarData()'>
+                            <input type='range' id='currentFileBackColorAlphaSlider' min='0' max='1' step='0.01'  value='`+filesJSON.svgItems[x].backColorAlpha+`'   oninput='document.getElementById("currentFileBackColorAlpha").value = this.value; updateSvgOptionsSidebarData(); '>
+                            <button id='currentFileBackColorClear' onclick='document.getElementById("currentFileBackColorAlphaSlider").value = document.getElementById("currentFileBackColorAlpha").value = "0";  updateSvgOptionsSidebarData()'>Clear</button>
                         </div>
-                        
-                    </div>
+                    </div>  
                 </div>
                 <div class="options">
                     <button onclick="closeModal()" class="badColor">Close</button>
@@ -391,9 +403,12 @@ function drawSelectedSvg(){
     }
     if (filesJSON.svgItems[x].paths != []){
         var z = ""
+        filesJSON.svgItems[x].paths.sort((path1, path2) => {
+            return compareOrderNumber(path1, path2, 'orderNum')
+          })
         for (z in filesJSON.svgItems[x].paths){
             if (filesJSON.svgItems[x].paths[z].type == 'circle'){
-                svgStringHelper += `<`+filesJSON.svgItems[x].paths[z].type+` cx="`+filesJSON.svgItems[x].paths[z].cx+`" cy="`+filesJSON.svgItems[x].paths[z].cy+`" r="`+filesJSON.svgItems[x].paths[z].r+`" stroke-width="`+filesJSON.svgItems[x].paths[z].strokeWidth+`" stroke="`+filesJSON.svgItems[x].paths[z].strokeCol+`"  fill="`+filesJSON.svgItems[x].paths[z].fill+`" />`;
+                svgStringHelper += `<`+filesJSON.svgItems[x].paths[z].type+` id="`+filesJSON.svgItems[x].paths[z].name+`-insidepath" cx="`+filesJSON.svgItems[x].paths[z].cx+`" cy="`+filesJSON.svgItems[x].paths[z].cy+`" r="`+filesJSON.svgItems[x].paths[z].r+`" stroke-width="`+filesJSON.svgItems[x].paths[z].strokeWidth+`"  stroke="rgba(`+parseInt(filesJSON.svgItems[x].paths[z].strokeCol.substring(1, 3), 16)+`,`+parseInt(filesJSON.svgItems[x].paths[z].strokeCol.substring(3, 5), 16)+`,` + parseInt(filesJSON.svgItems[x].paths[z].strokeCol.substring(5, 7), 16) + `, ` + filesJSON.svgItems[x].paths[z].strokeColAlpha + `)"  fill="rgba(`+parseInt(filesJSON.svgItems[x].paths[z].fill.substring(1, 3), 16)+`,`+parseInt(filesJSON.svgItems[x].paths[z].fill.substring(3, 5), 16)+`,`+parseInt(filesJSON.svgItems[x].paths[z].fill.substring(5, 7), 16)+`, `+filesJSON.svgItems[x].paths[z].fillAlpha+`)" />`;
             } 
             
 
@@ -416,7 +431,7 @@ function drawSelectedSvg(){
         document.getElementById('file-'+filesJSON.svgItems[x].name).style.left = filesJSON.svgItems[x].left+'px';
     }
     if (filesJSON.svgItems[x].backColor != ""){
-        document.getElementById('file-'+filesJSON.svgItems[x].name).style.backgroundColor = filesJSON.svgItems[x].backColor;
+        document.getElementById('file-'+filesJSON.svgItems[x].name).style.backgroundColor =  'rgba('+parseInt(filesJSON.svgItems[x].backColor.substring(1, 3), 16)+','+parseInt(filesJSON.svgItems[x].backColor.substring(3, 5), 16)+','+parseInt(filesJSON.svgItems[x].backColor.substring(5, 7), 16)+','+filesJSON.svgItems[x].backColorAlpha+')';
     }
 }
 
@@ -476,7 +491,7 @@ function addNewSvgElem(name, type){
     }
 
     if (type == 'circle'){
-        filesJSON.svgItems[x].paths.push({'name': name,'type': type, 'fill': 'red', 'cx': '20', 'cy': '20', 'r': '10','strokeCol':'blue','strokeWidth':'2'});
+        filesJSON.svgItems[x].paths.push({'orderNum': filesJSON.svgItems[x].paths.length, 'name': name,'type': type, 'fill': '#333333', 'fillAlpha': '1', 'cx': '20', 'cy': '20', 'r': '10','strokeCol':'#000000','strokeColAlpha':'1','strokeWidth':'2'});
     } else {
         filesJSON.svgItems[x].paths.push({'name': name,'type': type,});
     }
@@ -573,17 +588,53 @@ function editCircleElementForm(v){
                             <input type='range' id='circleRSlider' min='1' max='800' step='1'  value='`+filesJSON.svgItems[x].paths[v].r+`'   oninput='document.getElementById("circleR").value = this.value; updateCirclePathOptionsData(`+v+`); '>
                         </div>
                     </div>
-                    <div class="singleOption">
-                        <p>Fill</p>
-                        <input type="color" id="circleFillCol" value="`+filesJSON.svgItems[x].paths[v].fill+`" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
+                    <div class="singleOption extensiveOption">
+                        <h4>Fill</h4>
+                        <div class="singleOption">
+                            <p>Color</p>
+                            <div class='options'>
+                                <input type="color" id="circleFillCol" value="`+filesJSON.svgItems[x].paths[v].fill+`" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
+                            </div>
+                        </div>
+                        <div class="singleOption">
+                            <p>Color Opacity</p>
+                            <div class='options'>
+                                <input type='number' id='circleFillColAlpha' value='`+filesJSON.svgItems[x].paths[v].fillAlpha+`'   onchange='updateCirclePathOptionsData(`+v+`);'>
+                                <input type='range' id='circleFillColAlphaSlider' min='0' max='1' step='0.01'  value='`+filesJSON.svgItems[x].paths[v].fillAlpha+`'   oninput='document.getElementById("circleFillColAlpha").value = this.value; updateCirclePathOptionsData(`+v+`); '>
+                            </div>
+                        </div>>
+                        <div class="singleOption">
+                            <p>Clear Color</p>
+                            <div class='options'>
+                            <button id='circleFillColClear' onclick='document.getElementById("circleFillColAlphaSlider").value = document.getElementById("circleFillColAlpha").value = "0";  updateCirclePathOptionsData(`+v+`)'>Clear</button>
+                            </div>
+                        </div>
                     </div>
-                    <div class="singleOption">
-                        <p>Stroke</p>
-                        <input type="color" id="circleStrokeCol" value="`+filesJSON.svgItems[x].paths[v].strokeCol+`" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
-                    </div>
-                    <div class="singleOption">
-                        <p>Stroke width</p>
-                        <input type="range" min="0.1" max="5" value="`+filesJSON.svgItems[x].paths[v].strokeWidth+`" step="0.1" id="circleStrokeWidthCol" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
+                    <div class="singleOption extensiveOption">
+                        <h4>Stroke</h4>
+                        <div class="singleOption">
+                            <p>Color</p>
+                            <div class='options'>
+                                <input type="color" id="circleStrokeCol" value="`+filesJSON.svgItems[x].paths[v].strokeCol+`" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
+                            </div>
+                        </div>
+                        <div class="singleOption">
+                            <p>Color Opacity</p>
+                            <div class='options'>
+                                <input type='number' id='circleStrokeColAlpha' value='`+filesJSON.svgItems[x].paths[v].strokeColAlpha+`'   onchange='updateCirclePathOptionsData(`+v+`);'>
+                                <input type='range' id='circleStrokeColAlphaSlider' min='0' max='1' step='0.01'  value='`+filesJSON.svgItems[x].paths[v].strokeColAlpha+`'   oninput='document.getElementById("circleStrokeColAlpha").value = this.value; updateCirclePathOptionsData(`+v+`); '>
+                            </div>
+                        </div>
+                        <div class="singleOption">
+                            <p>Stroke width</p>
+                            <input type="range" min="0.1" value="`+filesJSON.svgItems[x].paths[v].strokeWidth+`" step="0.1" id="circleStrokeWidthCol" oninput='updateCirclePathOptionsData(`+v+`);' onchange='updateCirclePathOptionsData(`+v+`)'>
+                        </div>
+                        <div class="singleOption">
+                            <p>Clear Color</p>
+                            <div class='options'>
+                                <button id='circleStrokeColClear' onclick='document.getElementById("circleStrokeColAlphaSlider").value = document.getElementById("circleStrokeColAlpha").value = "0";  updateCirclePathOptionsData(`+v+`)'>Clear</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="options">
@@ -606,7 +657,9 @@ function updateCirclePathOptionsData(v){
     filesJSON.svgItems[x].paths[v].r = document.getElementById('circleR').value;
     filesJSON.svgItems[x].paths[v].strokeWidth = document.getElementById('circleStrokeWidthCol').value;
     filesJSON.svgItems[x].paths[v].strokeCol = document.getElementById('circleStrokeCol').value;
+    filesJSON.svgItems[x].paths[v].strokeColAlpha = document.getElementById('circleStrokeColAlpha').value;
     filesJSON.svgItems[x].paths[v].fill = document.getElementById('circleFillCol').value;
+    filesJSON.svgItems[x].paths[v].fillAlpha = document.getElementById('circleFillColAlpha').value;
 
     
     updateSidebarContentTabs();
@@ -635,4 +688,95 @@ function generateRandomNameFile(){
 
 function generateRandomNumber(){
     return Math.floor((Math.random() * 1000000000) + 1);
+}
+
+
+
+function startSingleElemSidebarHover(elem){
+    //alert(elem.getAttribute('data-name'));
+    document.querySelector('#'+elem.getAttribute('data-name')+'-insidepath').style.outline = '2px solid #03A9F4';
+    document.querySelector('#'+elem.getAttribute('data-name')+'-insidepath').style.boxShadow = '0 2px 5px #000000';
+}
+
+function endSingleElemSidebarHover(elem){
+    //alert(elem.getAttribute('data-name'));
+    document.querySelector('#'+elem.getAttribute('data-name')+'-insidepath').style.outline = '0 solid #03A9F4';
+    document.querySelector('#'+elem.getAttribute('data-name')+'-insidepath').style.boxShadow = '0 0 0 #000000';
+}   
+
+
+
+function deletePath(v){
+
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+
+    //console.log(filesJSON.svgItems[x].paths) 
+
+    filesJSON.svgItems[x].paths.indexOf(filesJSON.svgItems[x].paths[v]) > -1 ? filesJSON.svgItems[x].paths.splice(filesJSON.svgItems[x].paths.indexOf(filesJSON.svgItems[x].paths[v]), 1) : false
+
+    //console.log(filesJSON.svgItems[x].paths) 
+
+    updateSidebarContentTabs();
+    updateSidebarConContent(filesJSON.svgItems[x].name);
+    drawSelectedSvg();
+    
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
+
+}
+
+
+function compareOrderNumber( a, b ) {
+    if ( a.orderNum < b.orderNum ){
+      return -1;
+    }
+    if ( a.orderNum > b.orderNum ){
+      return 1;
+    }
+    return 0;
+  }
+
+
+  function movePathLayerBottom(v){
+      
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+    filesJSON.svgItems[x].paths[v].orderNum = filesJSON.svgItems[x].paths[v+1].orderNum + 1;
+
+    updateSidebarContentTabs();
+    updateSidebarConContent(filesJSON.svgItems[x].name);
+    drawSelectedSvg();
+    
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
+  }
+
+
+  function movePathLayerTop(v){
+      
+    var i, x, svgStringHelper = "";
+    for (i in filesJSON.svgItems) {
+        if (filesJSON.svgItems[i].selected == true){
+            x = i;
+        }
+    }
+    filesJSON.svgItems[x].paths[v].orderNum = filesJSON.svgItems[x].paths[v-1].orderNum - 1;
+
+    updateSidebarContentTabs();
+    updateSidebarConContent(filesJSON.svgItems[x].name);
+    drawSelectedSvg();
+    
+    document.getElementById('debugContentJSON').innerHTML = JSON.stringify(filesJSON, null, 2);
+  }
+
+
+function changeZoomLevel(){
+    document.getElementById('appSvgArea').querySelector('svg').style.transform = 'scale('+ document.getElementById('zoomLevel').value +')';
 }
