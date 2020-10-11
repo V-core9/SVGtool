@@ -61,7 +61,22 @@ a {
 
 
 div#appSvgArea {
-    width: calc(100% - 350px);
+    width: calc(100% - 330px);
+    margin-right: -20px;
+    height: calc(100% + 20px);
+    overflow: scroll;
+    position: relative;
+}
+
+.innHidd {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+    display: block;
+    height: 101%;
+    width: 100%;
+    top: 0;
+    left: 0;
 }
 
 div#appSidebar {
@@ -71,6 +86,7 @@ div#appSidebar {
     box-shadow: 0 0 10px black;
     display: flex;
     flex-direction: column;
+    z-index: 20;
 }
 
 button {
@@ -126,6 +142,7 @@ button:focus {
     display: flex;
     flex-direction: row;
     flex: 1;
+    z-index:  20;
 }
 
 .dropDownMenu {
