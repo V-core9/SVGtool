@@ -1,9 +1,0 @@
-.modal {
-    position: absolute;
-    width: 250px;
-    top: 20vh;
-    left: calc(50% - 125px);
-    padding: 10px 20px;
-    background: white;
-    box-shadow: 0 0 10px black;
-}
